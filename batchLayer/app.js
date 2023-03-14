@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require("cors");
 const app = express();
 const { KafkaConsumer } = require("node-rdkafka");
+const { indexDocument } = require("./models/elasticSearch");
 
 var server = require('http').createServer(app);
 
@@ -37,6 +38,8 @@ consumer
     });
     consumer.on("data", function (msg) {
         console.log(msg.value.toString());
+        const newOrder = JSON.parse(msg.value);
+        indexDocument(newOrder);
     });
 //------------
 
@@ -44,7 +47,6 @@ app.use(cors({}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => res.send("<a href='/send'>Send</a> <br/><a href=''>View</a>"));
-// app.get('/send', (req, res) => {kafka.publish(generateOrder.generateOrder(), count++);res.send('message was sent')});
 
 
 
