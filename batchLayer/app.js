@@ -3,13 +3,13 @@ const cors = require("cors");
 const app = express();
 const { KafkaConsumer } = require("node-rdkafka");
 const { indexDocument } = require("./models/elasticSearch");
+const { saveToDB, Order } = require('./models/mongodb');
 
 var server = require('http').createServer(app);
 
 const port = 3001
 
 //------------ kafka------------
-// const kafkaConsumer = require("./ConsumeFromKafka/consume");
 //until i figure out how to export consumer from file it will stay this way
 const consumer = new KafkaConsumer({
     "group.id": "cloudkarafka-example",
@@ -21,7 +21,7 @@ const consumer = new KafkaConsumer({
     "sasl.password": "m1LTLAMxlvowugr5Vp9/Zo5zEugypK6RqM3DaoS5YDNOWvw++8XCAUAgGSGkajXF",
     "debug": "generic,broker,security"
 });
-const topic = "topic_0";
+const topic = "pizzaSimulator.orderSrc";
 
 consumer.connect();
 consumer
@@ -39,6 +39,7 @@ consumer
     consumer.on("data", function (msg) {
         console.log(msg.value.toString());
         const newOrder = JSON.parse(msg.value);
+        saveToDB(newOrder);
         indexDocument(newOrder);
     });
 //------------
@@ -46,7 +47,9 @@ consumer
 app.use(cors({}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.get('/', (req, res) => res.send("<a href='/send'>Send</a> <br/><a href=''>View</a>"));
+app.get('/', (req, res) => res.send(
+    
+));
 
 
 

@@ -1,8 +1,22 @@
 const { Client } = require("@elastic/elasticsearch");
 const client = new Client({ node: "http://localhost:9200" });
 
+async function searchModified (field, item) {
+  const result = await client.search({
+    index: 'orders',
+    query: {
+      match: {
+        [field] : item
+      }
+    }
+  })
+ 
+  return (result.hits.hits)
+ }
+
+
 async function searchDocuments(query = { match_all: {} }) {
-  if (query.hasOwnProperty("branch") && query.branch !== "") {
+  if (query.hasOwnProperty("branch_id") && query.branch !== "") {
     query = {
       bool: {
         must: Object.entries(query).map(([field, value]) => ({
@@ -64,4 +78,4 @@ async function deleteAllDocuments() {
 //   console.log(document);
 // })();
 
-module.exports = { indexDocument, searchDocuments };
+module.exports = { indexDocument, searchDocuments, searchModified };
